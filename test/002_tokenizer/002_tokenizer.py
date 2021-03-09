@@ -10,6 +10,10 @@ sys.path.remove('..')
 def run():
     ret = 0
     ret += 1 if run_unit.run('./test/002_tokenizer/001') else 0
-
+    ret += 1 if run_unit.run('./test/002_tokenizer/002') else 0
+    ret += 1 if run_unit.run('./test/002_tokenizer/003') else 0
+    ret += 1 if run_unit.run('./test/002_tokenizer/004') else 0
+    ret += 1 if run_unit.run('./test/002_tokenizer/005') else 0
+    ret += 1 if run_unit.run('./test/002_tokenizer/006') else 0
 
     return ret
