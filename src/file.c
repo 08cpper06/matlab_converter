@@ -31,6 +31,7 @@ File* mc_load_file(const char* _path)
     File* out = (File*)calloc(sizeof(File), 1);
     out->filepath = (char*)_path;
     out->buffer = buf;
+    out->size = length;
     return out;
 }
 

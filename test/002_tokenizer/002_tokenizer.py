@@ -15,5 +15,6 @@ def run():
     ret += 1 if run_unit.run('./test/002_tokenizer/004') else 0
     ret += 1 if run_unit.run('./test/002_tokenizer/005') else 0
     ret += 1 if run_unit.run('./test/002_tokenizer/006') else 0
+    ret += 1 if run_unit.run('./test/002_tokenizer/007') else 0
 
     return ret

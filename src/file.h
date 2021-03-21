@@ -8,6 +8,7 @@ typedef struct {
     char* filepath;
 
     char* buffer;
+    int size;
 } File;
 
 

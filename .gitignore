@@ -1,5 +1,3 @@
-
-
-build/obj/
-build/
+/build/obj/*
+/build/*
 

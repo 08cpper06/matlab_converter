@@ -7,28 +7,19 @@
 
 
 
-
 int main(int argc, char** argv) {
     if (argc <= 1)
 	mc_error("no input file");
-//	printf("no input file\n");
-//	exit(1);
+
     File* in = mc_load_file(argv[1]);
 
-    Token* root = mc_tokenize(in);
+    Token* root = mc_tokenize(in, NULL);
     Token* p = root;
     while (p) {
 	printf("%s\n", p->str->buffer);
 	p = p->next;
+	if (p->type == TK_EOF) break;
     }
-
-    /*
-    char* p = in->buffer;
-    int c = (int)*p;
-    do{
-	printf("%s", &c);
-    } while((c = mc_consume(&p)) != '\0');
-    */
 
     free(in->buffer);
     free(in);

@@ -8,25 +8,37 @@
 int mc_consume(char** _p)
 {
     if (**_p != '\0')
-	++(*_p);
-    // TODO : support utf-8
+	*_p = *_p + mc_char_size(*_p);
     return (int)**_p;
 }
 
+int mc_char_size(char* _p)
+{
+    // TODO : support utf-8
+    return 1;
+}
 
 bool mc_skip_space(char** _p)
 {
-    if (isspace(**_p)) {
+//    if (isspace((int)**_p) || is_contains((int)**_p, "\n")) {
+    if (isspace((int)**_p)) {
 	++(*_p);
 	return true;
     }
     return false;
 }
 
+bool mc_is_skip(char* _p)
+{
+//    if (isspace((int)*_p) || is_contains((int)*_p, "\n")) return true;
+    if (isspace((int)*_p) || is_contains((int)*_p, "\n")) return true;
+    return false;
+}
+
 bool is_contains(int _c, const char* _cmp)
 {
-    for (char* p = (char*)_cmp; *p < '\0'; ++p)
-	if (_c == (int)*p)
+    for (char* p = (char*)_cmp; *p != '\0'; ++p)
+	if (_c == (int)(*p))
 	    return true;
     return false;
 }
@@ -35,7 +47,7 @@ Vector* mc_create_vector(int _size)
 {
     Vector* vec = (Vector*)calloc(sizeof(Vector), 1);
     vec->buffer = calloc(1, _size);
-    vec->size = _size;
+    vec->size = 0;
     vec->capacity = _size;
     return vec;
 }

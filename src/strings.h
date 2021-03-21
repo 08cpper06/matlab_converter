@@ -6,15 +6,19 @@
 typedef struct Vector Vector;
 
 struct Vector {
-    void* 	buffer;
+    char* 	buffer;
     int 	size;
     int 	capacity;
 };
 
 int mc_consume(char** _p);
 
+int mc_char_size(char* _p);
+
 // support ' ', '\t'
 bool mc_skip_space(char** _p);
+
+bool mc_is_skip(char* _p);
 
 bool is_contains(int _c, const char* _cmp);
 
