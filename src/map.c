@@ -4,29 +4,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-MapNode* mc_create_map(const char* key[], int* val)
+MapRoot* mc_create_map(const char* key[], int* val, int n)
 {
-    MapNode* node = (MapNode*)calloc(sizeof(MapNode), sizeof(val)/sizeof(val[0]) - sizeof(val[0]));
+    MapNode* node = (MapNode*)calloc(sizeof(MapNode), n);
     for (int i = 0; key[i] != NULL; ++i) {
 	node[i].key = (char*)key[i];
 	node[i].val = val[i];
     }
-    return node;
+    MapRoot* root = (MapRoot*)calloc(sizeof(MapRoot), 1);;
+    root->tree = node;
+    root->size = n;
+    return root;
 }
 
-int mc_find_data(MapNode* node, const char* key)
+int mc_find_data(MapRoot* node, const char* key)
 {
-    int n = sizeof(node) / sizeof(node[0]);
-    int i;
+    int i, n = node->size;
     for (i = 0; i < n; ++i) 
-	if(strcmp(node[i].key, key)) break;
+	if(strcmp(node->tree[i].key, key)) break;
     
     if (i == n) return -1;
-    return node[i].val;
+    return node->tree[i].val;
 }
 
-void mc_free_map(MapNode* _list)
+void mc_free_map(MapRoot* _list)
 {
+    free(_list->tree);
     free(_list);
 }
 

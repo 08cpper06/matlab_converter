@@ -1,0 +1,15 @@
+function
+test
+(
+)
+a
+=
+1
+;
+a
+=
+a
+./
+2
+;
+end

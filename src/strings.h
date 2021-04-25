@@ -22,6 +22,8 @@ bool mc_is_skip(char* _p);
 
 bool is_contains(int _c, const char* _cmp);
 
+bool is_startwith(char* _head, const char* _word);
+
 // vector
 Vector* mc_create_vector(int _size);
 void mc_free_vector(Vector* _v);

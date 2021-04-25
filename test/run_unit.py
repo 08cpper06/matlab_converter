@@ -6,7 +6,7 @@ def run(pth):
     ok_file = pth + '.ok'
     print(pth + ' -> ', end='')
 
-    proc = subprocess.Popen(['.' + os.sep + 'build' + os.sep+ 'matlab_converter.exe', in_file], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(['.' + os.sep + 'build' + os.sep+ 'matlab_converter.exe', in_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 #    proc = subprocess.run(['.' + os.sep + 'build' + os.sep+ 'matlab_converter.exe', in_file])
 #    return
     log = proc.stdout.read()
@@ -14,6 +14,12 @@ def run(pth):
     if os.name == 'nt':
         # CRLF -> LF
         log = log.replace('\r', '')
+
+    err_log = proc.stderr.read()
+    err_log = err_log.decode('utf-8')
+    if os.name =='nt':
+        # CRLF -> LF
+        err_log = err_log.replace('\r', '')
 
     ok_log = "".join([item for item in open(ok_file, 'r')])
 
@@ -28,9 +34,11 @@ def run(pth):
     else:
         print('\033[31mNG')
         print('--- ok_file ---')
-        print(ok_log)
+        print(ok_log.replace('\n', '↲\n'))
         print('--- actual ---')
-        print(log)
+        print(log.replace('\n', '↲\n'))
+        print('--- error ---')
+        print(err_log.replace('\n', '↲\n'))
         print('--------------\033[0m')
         return 1
 

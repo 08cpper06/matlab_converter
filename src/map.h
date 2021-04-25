@@ -4,16 +4,22 @@
 #include <stdbool.h>
 
 typedef struct MapNode MapNode;
+typedef struct MapRoot MapRoot;
 
 struct MapNode {
     char* 	key;
     int 	val;
 };
 
-MapNode* mc_create_map(const char* key[], int* val);
+struct MapRoot {
+    MapNode* 	tree;
+    int 	size;
+};
 
-int mc_find_data(MapNode* node, const char* key);
+MapRoot* mc_create_map(const char* key[], int* val, int n);
 
-void mc_free_map(MapNode* _list);
+int mc_find_data(MapRoot* node, const char* key);
+
+void mc_free_map(MapRoot* _list);
 
 #endif

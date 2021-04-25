@@ -10,7 +10,8 @@ typedef struct Span Span;
 
 typedef enum {
     TK_NONE,
-    TK_INTEGER,
+    TK_NUMBER,
+
     TK_ALPHABET,
 
     TK_COMMENT,
