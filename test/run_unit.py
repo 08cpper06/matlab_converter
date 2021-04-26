@@ -1,14 +1,17 @@
 import subprocess
 import os
 
+
 def run(pth):
     in_file = pth + '.in'
     ok_file = pth + '.ok'
     print(pth + ' -> ', end='')
 
-    proc = subprocess.Popen(['.' + os.sep + 'build' + os.sep+ 'matlab_converter.exe', in_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#    proc = subprocess.run(['.' + os.sep + 'build' + os.sep+ 'matlab_converter.exe', in_file])
-#    return
+    exe_file = 'matlab_converter'
+    if os.name == 'nt':
+        exe_file = exe_file + '.exe'
+
+    proc = subprocess.Popen(['.' + os.sep + 'build' + os.sep + exe_file, in_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     log = proc.stdout.read()
     log = log.decode('utf-8')
     if os.name == 'nt':
@@ -17,7 +20,7 @@ def run(pth):
 
     err_log = proc.stderr.read()
     err_log = err_log.decode('utf-8')
-    if os.name =='nt':
+    if os.name == 'nt':
         # CRLF -> LF
         err_log = err_log.replace('\r', '')
 
@@ -41,4 +44,3 @@ def run(pth):
         print(err_log.replace('\n', '↲\n'))
         print('--------------\033[0m')
         return 1
-

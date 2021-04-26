@@ -1,15 +1,16 @@
 import sys
 import os
-import glob
 import subprocess
 from importlib import import_module
 
 sys.dont_write_bytecode = True
 
+
 test_case = [
 #                '001_step',
                 '002_tokenizer'
             ]
+
 
 def get_make_cmd():
     if os.name == 'nt':
@@ -20,6 +21,7 @@ def get_make_cmd():
 def run_test(test_dir):
     mod = import_module(test_dir + '.' + test_dir)
     return mod.run()
+
 
 if __name__ == '__main__':
     subprocess.run([get_make_cmd(), 'clean'])
