@@ -1,5 +1,4 @@
 #include "lexer.h"
-#include "map.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +6,6 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-// FIXME : sort the order of function definition.
 
 
 

@@ -114,17 +114,6 @@ Vector* mc_merge_vector(Vector* _v1, Vector* _v2)
     return vec;
 }
 
-// to size == capacity
-void mc_fit_vector(Vector* _v)
-{
-    if (_v->size == _v->capacity) return;
-    void* ptr = realloc(_v->buffer, _v->size);
-    if (!ptr)
-	mc_error("cannot realloc memory for vector's buffer(%d) at fit_vec", _v->size);
-    _v->buffer = ptr;
-    _v->capacity = _v->size;
-}
-
 // copy
 Vector* mc_copy_vector(Vector* _v)
 {

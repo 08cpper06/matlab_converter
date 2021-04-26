@@ -16,12 +16,15 @@ ifeq ($(OS), Windows_NT)
     RM=rmdir
     RM_OPTION=/q /s
     RM_TARGET="$(BIN_DIR)"
+    MKDIR_OBJ=build\obj
 else
     PROGRAM=matlab_converter
     RM=rm
     RM_TARGET=$(OBJ_DIR) $(BIN_DIR)
     RM_OPTION=-rf
+    MKDIR_OBJ=build/obj
 endif
+
 
 .PHONY : all
 all: $(BIN_DIR)$(PROGRAM)
@@ -35,8 +38,8 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.c
 .PHONY : clean
 clean:
 	$(RM) $(RM_OPTION) $(RM_TARGET)
-	mkdir $(BIN_DIR)
-	mkdir $(OBJ_DIR)
+	mkdir build
+	mkdir $(MKDIR_OBJ)
 
 .PHONY : run
 run: clean $(BIN_DIR)$(PROGRAM)
