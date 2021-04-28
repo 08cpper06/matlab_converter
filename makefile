@@ -1,5 +1,10 @@
-CFLAGS=-Wall -std=c11
 
+
+# for release cflags
+# CFLAGS=-Wall -std=c11
+
+# for debug cflags
+CFLAGS=-Wall -std=c11 -DDEBUG
 
 SRC_DIR=./src/
 BIN_DIR=./build/

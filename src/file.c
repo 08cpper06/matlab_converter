@@ -1,4 +1,5 @@
 #include "file.h"
+#include "memory.h"
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,13 +23,13 @@ File* mc_load_file(const char* _path)
     int length = ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    char* buf = (char*)calloc(length, 1);
+    char* buf = (char*)mc_calloc(length, 1);
     fread(buf, sizeof(char), length, fp);
     // expilictly insert NULL(fread() does not insert null to the end of buffer)
     buf[length - 1] = '\0';
     fclose(fp);
 
-    File* out = (File*)calloc(sizeof(File), 1);
+    File* out = (File*)mc_calloc(sizeof(File), 1);
     out->filepath = (char*)_path;
     out->buffer = buf;
     out->size = length;
@@ -47,4 +48,14 @@ int mc_is_exist(const char* _path)
     if ((st.st_mode & S_IFMT) == S_IFDIR)
 	return 2;
     return 0;
+}
+
+Vector* mc_check_path(Vector* _path)
+{
+    if (!_path) return NULL;
+    for (int i = 0; i < _path->size; ++i) {
+	if (_path->buffer[i] == '\\')
+	    _path->buffer[i] = '/';
+    }
+    return _path;
 }

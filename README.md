@@ -17,17 +17,18 @@ Linux & mac (if possible)
 
 
 # idea
-+ tokenizer -> now coding<br>
++ tokenizer -> completed<br>
   build token list for old version.<br>
-+ parser (not yet)<br>
++ parser -> now coding<br>
   build Concrete Syntax Tree(CST) for old version.<br>
 + converter (not yet)<br>
   analyze as new version & fix error.<br>
   (need to implement every version)<br>
 + unparser (not yet)<br>
   reconstruct token list from CST.<br>
-+ untokenizer (not yet)<br>
++ untokenizer -> completed?<br>
   reconstruct source code.<br>
+
 
 # features (future)
 + customize converter without recompiling.

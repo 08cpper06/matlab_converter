@@ -1,12 +1,9 @@
 #include "lexer.h"
+#include "memory.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <ctype.h>
-#include <stdbool.h>
-
-
 
 
 // error
@@ -16,6 +13,7 @@ void mc_error(char* _fmt, ...)
     va_start(ap, _fmt);
     vfprintf(stderr, _fmt, ap);
     fprintf(stderr, "\n");
+    mc_all_free();
     exit(1);
 }
 
@@ -37,8 +35,8 @@ void mc_error_at(char* _loc, char* _fmt, ...)
 
 Token* mc_create_token()
 {
-    Token* tok = (Token*)calloc(sizeof(Token), 1);
-    tok->str = mc_create_vector(32);
+    Token* tok = (Token*)mc_calloc(1, sizeof(Token));
+    tok->str = NULL;
     tok->type = TK_NONE;
     tok->next = NULL;
     tok->prev = NULL;
@@ -47,444 +45,134 @@ Token* mc_create_token()
 
 void mc_free_token(Token* _tok)
 {
-    mc_free_vector(_tok->str);
-    free(_tok);
+    if (_tok->str) mc_free_vector(_tok->str);
+    mc_free(_tok);
 }
 
-static bool mc_is_alphabet(char* _p) 
-{
-    if (('a' <= *_p && *_p <= 'z') ||
-	('A' <= *_p && *_p <= 'Z'))
-	return TK_ALPHABET;
-    return TK_NONE;
-}
+/*
+static const char* g_token_type_names[] = {
+    "TK_NONE",// none is skipped by tokenizer
+    "TK_NUMBER",
 
-static int mc_try_tokenize_identifer(char** loc, Token** _tok)
-{
-    char* p = *loc;
-    if (mc_is_alphabet(p) == TK_NONE) return 0;
-    Token* tok = mc_create_token();
-    if (*_tok) {
-	(*_tok)->next = tok;
-	tok->prev = *_tok;
-    }
-    mc_skip_space(&p);
-    mc_set_vector(tok->str, p, mc_char_size(p));
-    tok->type = mc_is_alphabet(p);
-    tok->loc = p;
-    mc_consume(&p);
-    mc_skip_space(&p);
+    "TK_ALPHABET",
+
+    "TK_COMMENT",
+
+    "TK_BIN_OP",
+    "TK_STRING",
+
+    "TK_CTRANS",
     
-    // loop until different char type
-    while((mc_is_alphabet(p) == tok->type)) {
-	mc_append_vector(tok->str, p, mc_char_size(p));
-	mc_consume(&p);
-	if (mc_is_skip(p))
-	    mc_skip_space(&p);
-    }
-    mc_skip_space(&p);
-    *loc = p;
-    *_tok = tok;
-    return 1;
-}
+    "TK_PAREN",
+    "TK_BRACE",
+    "TK_BRAKET",
+    "TK_COLON",
+    "TK_DOT",
+    "TK_SEMICOLON",
+    "TK_AT_MARK",
+    "TK_QUATE",
 
-static TokenType mc_check_type(char* _p) {
-    if (*_p == '.') return TK_DOT;
-    if (*_p == ';') return TK_SEMICOLON;
-    if (*_p == ':') return TK_COLON;
-    if (*_p == '@') return TK_AT_MARK;
-    if (*_p == '\n') return TK_NEW_LINE;
-    if (*_p == '\0') return TK_EOF;
+    "TK_BREAK",
+    "TK_CASE",
+    "TK_CATCH",
+    "TK_CLASSDEF",
+    "TK_CONTINUE",
+    "TK_ELSE",
+    "TK_ELSEIF",
+    "TK_END",
+    "TK_FOR",
+    "TK_FUNCTION",
+    "TK_GLOBAL",
+    "TK_IF",
+    "TK_OTHERWISE",
+    "TK_PARFOR",
+    "TK_PERSiSTENT",
+    "TK_RETURN",
+    "TK_SPMD",
+    "TK_SWITCH",
+    "TK_TRY",
+    "TK_WHILE",
 
-    if (is_contains((int)*_p, "=+-/*|&^~<>~\\"))
-	return TK_BIN_OP;
-    if (is_contains((int)*_p, "()"))
-	return TK_PAREN;
-    if (is_contains((int)*_p, "{}"))
-	return TK_BRACE;
-    if (is_contains((int)*_p, "[]"))
-	return TK_BRAKET;
+    "TK_CMP_EQUAL",
+    "TK_CMP_NOT_EQUAL",
+    "TK_CMP_LESS",
+    "TK_CMP_MORE",
 
-    return TK_NONE;
-}
+    "TK_CMP_AND",
+    "TK_CMP_OR",
 
-static int mc_try_tokenize_single_signs(char** loc, Token** _tok)
+    "TK_TRANS",
+
+    "TK_EACH_POWER",
+    "TK_EACH_MUL",
+    "TK_EACH_R_DIV",
+    "TK_EACH_L_DIV",
+
+    "TK_NEW_LINE",
+    "TK_EOF"
+};
+
+static void add_xml_new_line_tag(FILE* fp, Token* _tok, int* _depth)
 {
-    char* p = *loc;
-    if (mc_check_type(p) == TK_NONE)
-	return 0;
-    Token* tok = mc_create_token();
-    if (*_tok) {
-	(*_tok)->next = tok;
-	tok->prev = *_tok;
+    if (!_tok) mc_error("current token is null at add_xml_rest_str_tag()");
+    if (depth > 1) {
+	--(*_depth);
+	for (int i = 0; i < *_depth; ++i) fprintf(fp, "\t");
+	fprintf(fp, "</line>\n");
     }
-    // get first char
-    mc_set_vector(tok->str, p, mc_char_size(p));
-    tok->type = mc_check_type(p);
-    tok->loc = p;
-    mc_consume(&p);
-    mc_skip_space(&p);
-    *loc = p;
-    *_tok = tok;
-    return 1;
+    for (int i = 0; i < *_depth; ++i) fprintf(fp, "\t");
+    fprintf(fp, "<line>\n");
+    ++(*_depth);
 }
 
-static int mc_try_skip_comment(char** loc, Token** _tok)
+static void add_xml_other_tag(FILE* fp, Token* _tok, int* _depth)
 {
-    char* p = *loc;
-    if (*p != '%') return 0;
-    while(*p != '\n')
-	mc_consume(&p);
-    // skip '\n'
-    mc_consume(&p);
-    mc_skip_space(&p);
-    *loc = p;
-    return 0;
 }
 
-static int mc_try_tokenize_multi_signs(char** loc, Token** _tok, Env* _env)
+static void add_xml_rest_str_tag(FILE* fp, Token* _tok, int* _depth)
 {
-    if (!_env) mc_error("_env is null ptr at mc_try_tokenize_keywords()");
-    bool list[256];
-    int n = _env->multi_signs_size, count = 0, idx = 0, len = 0;
-    if (n > 256) mc_error("the list of keyword is too big list");
-    // check each keyword
-    for (int i = 0; i < n; ++i) {
-	if (is_startwith(*loc, _env->multi_signs_key[i]->buffer)
-	) {
-	    ++count;
-	    list[i] = true;
-	} else list[i] = false;
-    }
-    if (!count) return 0;
-    if (count == 1) {
-	for (idx = 0; idx < n; ++idx) 
-	    if (list[idx]) break;
-    } else {
-	for (int i = 0; i < n; ++i) {
-	    if (list[i] && len < _env->multi_signs_key[i]->size) {
-		idx = i;
-		len = _env->multi_signs_key[i]->size;
-	    }
+    if (!_tok) mc_error("current token is null at add_xml_rest_str_tag()");
+    Token* next = _tok->next;
+    if (!next) mc_error("next token is null at add_xml_rest_str_tag()");
+    char* bgn = _tok->loc + strlen(_tok->str->size);
+    char* end = next->loc;
+    if (!(end - bgn)) return;
+    for (int i = 0; i < *_depth; ++i) fprintf(fp, "\t");
+    fprintf(fp, "<token type=\"TK_NONE\" value=\"%.*s\"/>\n", end - bgn, bgn);
+    // "%.*s" => "%#X" (char -> hex)
+//    fprintf(fp, "<token type=\"TK_NONE\" value=\"");
+//    for (; bgn != end; ++bgn)
+//	fprintf(fp, "%#X", (int)*bgn);
+//    fprintf(fp, "\"/>\n");
+}
+
+void mc_write_token_list(File* _file, Token* _tokens, const char* _path)
+{
+    Token* t = _tokens;
+    char* p  =  _file->buffer;
+
+    FILE* fp = fopen(_path, "w");
+    if (!fp) mc_error("could not open file: \"%s\"", _path);
+    int depth = 1;
+    fprintf(fp, "<root>\n");
+
+    while (t) {
+	// add tag (struct Token)
+	switch (t->type) {
+	    case TK_NEW_LINE:
+		add_xml_new_line_tag(fp, t, &depth);
+		break;
+	    case TK_EOF: break;
+	    default:
+		add_xml_other_tag(fp, t, &depth);
+		break;
 	}
+
+	// add tag (skip char, comment)
+	add_xml_rest_str_tag(fp, t, &depth);
+
+	t = t->next;
     }
-    // update loc, _tok and add token list
-    Token* tok = mc_create_token();
-    {
-	tok->type = _env->multi_signs_val[idx];
-	tok->loc = *loc;
-	tok->str = mc_copy_vector(_env->multi_signs_key[idx]);
-	tok->prev = *_tok;
-	if (*_tok)
-	    (*_tok)->next = tok;
-    }
-    *_tok = tok;
-    *loc += _env->multi_signs_key[idx]->size - 1;
-    mc_skip_space(loc);
-    return 1;
-}
-
-static int mc_try_tokenize_transpose(char** _loc, Token** _tok)
-{
-    if (!(*_tok)) return 0;
-
-    char* p = *_loc;
-    if (*p != '\'') {
-	if (*p != '.') return 0;
-	else if (*(p + 1) != '\'') return 0;
-    }
-
-    p = (*_tok)->loc;
-    switch ((*_tok)->type) {// prev token
-	case TK_NUMBER:
-	case TK_ALPHABET:
-	case TK_BRACE:
-	    if (*p == '{') return 0;
-	case TK_BRAKET:
-	    if (*p == '[') return 0;
-	    break;
-	default:
-	    return 0;
-    }
-    // not space between previous and current token
-    p = (*_tok)->loc;
-    for (; p != *_loc; ++p) if (mc_is_skip(p)) return 0;
-    
-
-    Token* tok = mc_create_token();
-    if (*_tok) {
-	(*_tok)->next = tok;
-	tok->prev = *_tok;
-    }
-    if (*p == '\'')
-	tok->type = TK_CTRANS;
-    else if (*p == '.' && *(p + 1) == '\'')
-	tok->type = TK_TRANS;
-    tok->loc = *_loc;
-    if (tok->type == TK_TRANS) {
-	tok->str = mc_create_vector(3);
-	mc_set_vector(tok->str, p, 2);
-	*_loc += 2;
-    } if (tok->type == TK_CTRANS) {
-	tok->str = mc_create_vector(2);
-	mc_set_vector(tok->str, p, 1);
-	*_loc += 1;
-    }
-    *_tok = tok;
-    mc_skip_space(_loc);
-    return 1;
-}
-
-static int mc_try_tokenize_keywords(char** loc, Token** _tok, Env* _env)
-{
-    if (!_env) mc_error("_env is null ptr at mc_try_tokenize_keywords()");
-    bool list[256];
-    int _max = strlen(*loc) + 1;
-    int n = _env->keywords_size, count = 0, idx = 0, len = 0;
-    if (n > 256) mc_error("the list of keyword is too big list");
-    // check each keyword
-    for (int i = 0; i < n; ++i) {
-	if (_max >= _env->keywords_key[i]->size
-	    && is_startwith(*loc, _env->keywords_key[i]->buffer)
-	) {
-	    ++count;
-	    list[i] = true;
-	} else list[i] = false;
-    }
-    if (!count) return 0;
-    if (count == 1) {
-	for (idx = 0; idx < n; ++idx) 
-	    if (list[idx]) break;
-    } else {
-	for (int i = 0; i < n; ++i) {
-	    if (list[i] && len < _env->keywords_key[i]->size) {
-		idx = i;
-		len = _env->keywords_key[i]->size;
-	    }
-	}
-    }
-    // update loc, _tok and add token list
-    Token* tok = mc_create_token();
-    {
-	tok->type = _env->keywords_val[idx];
-	tok->loc = *loc;
-	tok->str = mc_copy_vector(_env->keywords_key[idx]);
-	tok->prev = *_tok;
-	if (*_tok)
-	    (*_tok)->next = tok;
-    }
-    *_tok = tok;
-    *loc += _env->keywords_key[idx]->size - 1;
-    mc_skip_space(loc);
-    return 1;
-}
-
-// <DIGIT>  ::= ('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9')+
-static Vector* mc_try_parse_digit(char** _loc)
-{
-    char* p = *_loc;
-    while(isdigit((int)*p)) ++p;
-    // could not parse
-    if (p == *_loc) {
-	return NULL;
-    }
-    Vector* vec = mc_create_vector((int)(p - *_loc + 1));
-    mc_append_vector(vec, *_loc, (int)(p - *_loc));
-    *_loc = p;
-    return vec;
-}
-
-// <REAL>   ::= <DIGIT> '.'? <DIGIT> ('e' | 'E') ('+' | '-') <DIGIT>
-// 	      | <DIGIT> '.'
-// 	      | <DIGIT>? '.' <DIGIT>
-static Vector* mc_try_parse_real(char** loc)
-{
-    char* p = *loc;
-    Vector* v = mc_try_parse_digit(&p);
-    if (*p == '.') {
-	if (!v) {
-	    // ex) ".112"
-	    v = mc_create_vector(1);
-	    mc_append_vector(v, p, 1);
-	    ++p;
-	    Vector* v2 = mc_try_parse_digit(&p);
-	    if (!v2) mc_error("only \'.\' is not valid number");
-	    Vector* tmp = mc_merge_vector(v, v2);
-	    mc_free_vector(v);
-	    mc_free_vector(v2);
-	    v = tmp;
-	} else {
-	    mc_append_vector(v, p, 1);
-	    ++p;
-	    Vector* v2 = mc_try_parse_digit(&p);
-	    if (v2) {// ex) "323.22"
-		Vector* tmp = mc_merge_vector(v, v2);
-		mc_free_vector(v);
-		mc_free_vector(v2);
-		v = tmp;
-	    }// else ex) "323."
-	}
-    } else if (!v) return NULL;
-    if (*p == 'e' || *p == 'E') {
-	if (*(p + 1) != '+' && *(p + 1) != '-') {
-	    mc_free_vector(v);
-	    return NULL;
-	}
-	mc_append_vector(v, p, 2);
-	p += 2;
-	Vector* v2 = mc_try_parse_digit(&p);
-	if (!v2) {
-	    mc_free_vector(v);
-	    mc_free_vector(v2);
-	    return NULL;
-	}
-	Vector* tmp = mc_merge_vector(v, v2);
-	mc_free_vector(v);
-	mc_free_vector(v2);
-	v = tmp;
-    }
-    *loc = p;
-    return v;
-}
-
-// <NUMBER> ::= <REAL> (('+' | '-') <REAL> ('i' | 'j'))?
-static int mc_try_tokenize_number(char** _loc, Token** _tok)
-{
-    char* p = *_loc;
-    Vector* v = mc_try_parse_real(&p);
-//    Vector* v = mc_try_parse_digit(&p);
-    if (!v) return 0;
-
-    Token* tok = mc_create_token();
-    if (*_tok) {
-	(*_tok)->next = tok;
-    }
-    tok->prev = *_tok;
-    tok->loc = *_loc;
-    tok->type = TK_NUMBER;
-    tok->str = v;
-
-    *_tok = tok;
-    mc_skip_space(&p);
-    *_loc = p;
-    return 1;
-}
-
-static int mc_try_tokenize_string(char** loc, Token** _tok)
-{
-    char* p = *loc;
-    if (*p != '\'' && *p != '\"') return 0;
-    Token* tok = mc_create_token();
-    if (*_tok) {
-	(*_tok)->next = tok;
-    }
-    tok->prev = *_tok;
-    char c = *p;
-    tok->loc = p;
-    tok->type = TK_QUATE;
-    mc_set_vector(tok->str, p, mc_char_size(p));
-    mc_consume(&p);
-    {// " or '
-	Token* new_tok = mc_create_token();
-	new_tok->prev = tok;
-	tok->next = new_tok;
-	tok = tok->next;
-    }
-
-    tok->loc = p;
-    tok->type = TK_STRING;
-    while(c != *p && *p != '\0') {
-	if (*p == '\n') {
-	    mc_error("reach '\n' before the end of string(%c)", c);
-	}
-	mc_append_vector(tok->str, p, mc_char_size(p));
-	mc_consume(&p);
-    }
-
-    if (*p == '\0') {
-	mc_error_at(*loc, "reached EOF before %c", tok->str->buffer[0]);
-	// unreachable
-	return 0;
-    }
-
-    {// string component
-	Token* new_tok = mc_create_token();
-	new_tok->prev = tok;
-	tok->next = new_tok;
-	tok = tok->next;
-    }
-    tok->loc = p;
-    tok->type = TK_QUATE;
-    mc_set_vector(tok->str, p, mc_char_size(p));
-    mc_consume(&p);
-    mc_skip_space(&p);
-
-    *loc = p;
-    *_tok = tok;
-    return 1;
-}
-
-
-// ==============================
-// |                            |
-// |   main tokenize function   |
-// |                            |
-// ==============================
-Token* mc_tokenize(File* _file, Env* _env)
-{
-    char* loc = _file->buffer;
-    Token* root = NULL;
-    Token* tok = NULL;
-    while(*loc != '\0' && (loc - _file->buffer) < _file->size) {
-	// skip comment
-	if (mc_try_skip_comment(&loc, &tok))
-	    goto UPDATE;
-
-	// tokenize keywords
-	if (mc_try_tokenize_keywords(&loc, &tok, _env))
-	    goto UPDATE;
-	
-	// tokenize multi-char signs
-	if (mc_try_tokenize_multi_signs(&loc, &tok, _env))
-	    goto UPDATE;
-	
-	// tokenize transpose-op & ctranspose-op (chech whether prev char is non-space)
-	if (mc_try_tokenize_transpose(&loc, &tok))
-	    goto UPDATE;
-
-	// tokenize number
-	if (mc_try_tokenize_number(&loc, &tok))
-	    goto UPDATE;
-	
-	// tokenize string
-	if (mc_try_tokenize_string(&loc, &tok))
-	    goto UPDATE;
-
-	// tokenize identifer
-	if (mc_try_tokenize_identifer(&loc, &tok))
-	    goto UPDATE;
-
-	// tokenize single-char words
-	if (mc_try_tokenize_single_signs(&loc, &tok))
-	    goto UPDATE;
-
-	
-	mc_error_at(loc, "reached unknown token(\'%s\')", *loc);
-UPDATE:
-	// update
-	if (!root) 
-	    // loop until reaching root
-	    for (root = tok; root->prev; root = root->prev);
-    }
-
-    // if list has no TK_EOF token, push back EOF
-    if (tok->type != TK_EOF && *loc == '\0') {
-	Token* new_tok = mc_create_token();
-	new_tok->prev = tok;
-	tok->next = new_tok;
-
-	new_tok->type = TK_EOF;
-	mc_set_vector(new_tok->str, loc, 1);
-    }
-    return root;
-}
+    fprintf(fp, "</root>\n");
+    fclose(fp);
+}*/

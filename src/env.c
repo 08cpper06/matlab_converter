@@ -1,5 +1,6 @@
 #include "env.h"
 #include "lexer.h"
+#include "memory.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -90,8 +91,8 @@ static void mc_init_map(const char* _ver, Env** _env)
 {
     (void) _ver;
     if (!(*_env)) mc_error("env is null-ptr at mc_init_map()");
-    (*_env)->keywords_key = (Vector**)calloc(sizeof(Vector*), KEYWORDS_NUM);
-    (*_env)->keywords_val = (int*)calloc(sizeof(int), KEYWORDS_NUM);
+    (*_env)->keywords_key = (Vector**)mc_calloc(sizeof(Vector*), KEYWORDS_NUM);
+    (*_env)->keywords_val = (int*)mc_calloc(sizeof(int), KEYWORDS_NUM);
     (*_env)->keywords_size = KEYWORDS_NUM;
     for (int i = 0; i < KEYWORDS_NUM; ++i) {
 	int n = strlen(g_keywords_key_list[i]) + 1;
@@ -99,8 +100,8 @@ static void mc_init_map(const char* _ver, Env** _env)
 	mc_set_vector((*_env)->keywords_key[i], (void*)g_keywords_key_list[i], n);
 	(*_env)->keywords_val[i] = (int)g_keywords_val_list[i];
     }
-    (*_env)->multi_signs_key = (Vector**)calloc(sizeof(Vector*), MULTI_SIGNS_NUM);
-    (*_env)->multi_signs_val = (int*)calloc(sizeof(int), MULTI_SIGNS_NUM);
+    (*_env)->multi_signs_key = (Vector**)mc_calloc(sizeof(Vector*), MULTI_SIGNS_NUM);
+    (*_env)->multi_signs_val = (int*)mc_calloc(sizeof(int), MULTI_SIGNS_NUM);
     (*_env)->multi_signs_size = MULTI_SIGNS_NUM;
     for (int i = 0; i < MULTI_SIGNS_NUM; ++i) {
 	int n = strlen(g_signs_key_list[i]) + 1;
@@ -115,7 +116,7 @@ Env* mc_create_env(int argc, char** argv)
 {
     (void) argc;
     (void) argv;
-    Env* env = (Env*)malloc(sizeof(Env));
+    Env* env = (Env*)mc_malloc(sizeof(Env));
     if (!env) mc_error("cannot create env structure");
     mc_init_map(NULL, &env);
     return env;
@@ -125,12 +126,12 @@ void mc_free_env(Env* _env)
 {
     for (int i = 0; i < _env->keywords_size; ++i)
 	mc_free_vector(_env->keywords_key[i]);
-    free(_env->keywords_key);
-    free(_env->keywords_val);
+    mc_free(_env->keywords_key);
+    mc_free(_env->keywords_val);
     for (int i = 0; i < _env->multi_signs_size; ++i)
 	mc_free_vector(_env->multi_signs_key[i]);
-    free(_env->multi_signs_key);
-    free(_env->multi_signs_val);
+    mc_free(_env->multi_signs_key);
+    mc_free(_env->multi_signs_val);
 
-    free(_env);
+    mc_free(_env);
 }

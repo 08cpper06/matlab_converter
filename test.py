@@ -7,8 +7,9 @@ sys.dont_write_bytecode = True
 
 
 test_case = [
-#                '001_step',
-                '002_tokenizer'
+                '001_step',
+                '002_tokenizer',
+                '004_untokenizer'
             ]
 
 

@@ -8,9 +8,10 @@ sys.path.remove('..')
 
 
 def run():
+    option = []
     ret = 0
-    ret += 1 if run_unit.run('./test/003_parser/001') else 0
-    ret += 1 if run_unit.run('./test/003_parser/002') else 0
-    ret += 1 if run_unit.run('./test/003_parser/003') else 0
+    ret += 1 if run_unit.run('./test/003_parser/001', option) else 0
+    ret += 1 if run_unit.run('./test/003_parser/002', option) else 0
+    ret += 1 if run_unit.run('./test/003_parser/003', option) else 0
 
     return ret

@@ -9,10 +9,8 @@ sys.path.remove('..')
 
 
 def run():
+    option = ['-mode', 'debug_001']
     ret = 0
-    ret += 1 if run_unit.run('./test/001_step/001') else 0
-
-
-
+    ret += 1 if run_unit.run('./test/001_step/001', option) else 0
 
     return ret

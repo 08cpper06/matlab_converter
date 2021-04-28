@@ -6,7 +6,6 @@
 #include "strings.h"
 
 typedef struct Token Token;
-typedef struct Span Span;
 
 typedef enum {
     TK_NONE,
@@ -75,14 +74,12 @@ typedef enum {
 
 } TokenType;
 
-
 struct Token {
     TokenType 	type;
     Vector*	str;
     Token*	next;
     Token*	prev;
     char* 	loc;
-
 };
 
 
@@ -94,9 +91,13 @@ _Noreturn void mc_error_at(char* _loc, char* _fmt, ...);
 Token* mc_create_token();
 void mc_free_token(Token* _tok);
 
-// Tokenize from File*
+// void mc_write_token_list(File* _file, Token* _tokens, const char* _path);
+
+
+// Tokenize from File* at "tokenizer.c"
 Token* mc_tokenize(File* _file, Env* _env);
 
-
+// UnTokenize from token list
+Vector* mc_untokenize(Token* _token, File* _file, Env* _env);
 
 #endif

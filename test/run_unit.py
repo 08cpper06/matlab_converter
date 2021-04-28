@@ -2,7 +2,7 @@ import subprocess
 import os
 
 
-def run(pth):
+def run(pth, option):
     in_file = pth + '.in'
     ok_file = pth + '.ok'
     print(pth + ' -> ', end='')
@@ -11,7 +11,11 @@ def run(pth):
     if os.name == 'nt':
         exe_file = exe_file + '.exe'
 
-    proc = subprocess.Popen(['.' + os.sep + 'build' + os.sep + exe_file, in_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd_str = ['.' + os.sep + 'build' + os.sep + exe_file, in_file]
+    if option:
+        cmd_str.extend(option)
+
+    proc = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     log = proc.stdout.read()
     log = log.decode('utf-8')
     if os.name == 'nt':
@@ -31,7 +35,7 @@ def run(pth):
 
     proc.kill()
 
-    if ok_log == log and not proc.returncode:
+    if ok_log == log and not proc.returncode and not err_log:
         print('\033[33mOK\033[0m')
         return 0
     else:

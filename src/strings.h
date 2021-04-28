@@ -37,6 +37,8 @@ void mc_append_vector(Vector* _v, void* _p, int _n);
 // _v2 is appended to the end of _v1
 Vector* mc_merge_vector(Vector* _v1, Vector* _v2);
 
+void mc_fit_vector(Vector* _v);
+
 // copy
 Vector* mc_copy_vector(Vector* _v);
 
