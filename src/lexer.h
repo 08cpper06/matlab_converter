@@ -5,7 +5,12 @@
 #include "env.h"
 #include "strings.h"
 
+
 typedef struct Token Token;
+
+// the following token type list for output
+extern const char* g_token_type_names[];
+
 
 typedef enum {
     TK_NONE,
@@ -76,10 +81,16 @@ typedef enum {
 
 struct Token {
     TokenType 	type;
+    // if this is edited token by converter, str is not null.
     Vector*	str;
     Token*	next;
     Token*	prev;
     char* 	loc;
+    char*	end;// from loc to end
+
+    // TOOD: use the following
+    // int 	line;
+    // Token*	line_head;
 };
 
 

@@ -4,6 +4,10 @@
 #include <stdarg.h>
 #include <string.h>
 
+#ifndef MC_THREAD_LOCAL
+#define MC_THREAD_LOCAL __thread
+#endif
+
 typedef struct MemBlock MemBlock;
 typedef struct MemListNode MemListNode;
 
@@ -19,9 +23,9 @@ struct MemListNode {
 };
 
 
-MemListNode root = { NULL, NULL, NULL};
-MemListNode* last = NULL;
-int node_num = 0;
+MC_THREAD_LOCAL MemListNode root = { NULL, NULL, NULL };
+MC_THREAD_LOCAL MemListNode* last = NULL;
+MC_THREAD_LOCAL int node_num = 0;
 
 static _Noreturn void mc_mem_error(char* _fmt, ...)
 {
@@ -47,7 +51,7 @@ void* mc_malloc(size_t size)
     if (!last) last = &root;
     last->next		= node;
     node->prev		= last;
-    last 		= node;
+    last 			= node;
     ++node_num;
     return (void*)block + sizeof(MemBlock);
 }
@@ -94,7 +98,7 @@ void mc_all_free()
 {
     if (!last) return;
     for (;last->prev != &root;) {
-	mc_free((void*)(last->info) + sizeof(MemBlock));
+		mc_free((void*)(last->info) + sizeof(MemBlock));
     }
     mc_free((void*)(last->info) + sizeof(MemBlock));
 }
@@ -105,8 +109,8 @@ int mc_check_mem_leak()
     int size = 0;
     MemListNode* p = last;
     for (; p->prev;) {
-	size += p->info->size;
-	p = p->prev;
+		size += p->info->size;
+		p = p->prev;
     }
     return size;
 }
@@ -118,10 +122,10 @@ void mc_print_mem_leak()
     fprintf(stderr, "--- memory leak information ---\n");
     MemListNode* p = last;
     for (; p != &root;) {
-	block = p->info;
-	fprintf(stderr, "[size: %d]\n", block->size);
-	size += block->size;
-	p = p->prev;
+		block = p->info;
+		fprintf(stderr, "[size: %d]\n", block->size);
+		size += block->size;
+		p = p->prev;
     }
     fprintf(stderr, "%d bytes(the number of memory block: %d)\n", size, node_num);
     fprintf(stderr, "--- end of memory leak information ---\n");
@@ -134,12 +138,14 @@ void mc_print_mem_info()
     printf("--- memory information ---\n");
     MemListNode* p = last;
     for (; p != &root;) {
-	block = p->info;
-	size += block->size;
-	p = p->prev;
+		block = p->info;
+		size += block->size;
+		p = p->prev;
     }
     printf("memory info structure: %lu bytes\n", (sizeof(MemBlock) + sizeof(MemListNode)) * node_num);
     printf("used memeory: %d bytes\n", size);
     printf("%lu bytes(the number of memory block: %d)\n", size + (sizeof(MemBlock) + sizeof(MemListNode)) * node_num, node_num);
     printf("--- end of memory information ---\n");
 }
+
+#undef MC_THREAD_LOCAL

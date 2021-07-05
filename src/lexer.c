@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "env.h"
 #include "memory.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,7 +37,9 @@ void mc_error_at(char* _loc, char* _fmt, ...)
 Token* mc_create_token()
 {
     Token* tok = (Token*)mc_calloc(1, sizeof(Token));
-    tok->str = NULL;
+//    tok->str = NULL;
+    tok->loc = NULL;
+    tok->end = NULL;
     tok->type = TK_NONE;
     tok->next = NULL;
     tok->prev = NULL;
@@ -45,12 +48,11 @@ Token* mc_create_token()
 
 void mc_free_token(Token* _tok)
 {
-    if (_tok->str) mc_free_vector(_tok->str);
+//    if (_tok->str) mc_free_vector(_tok->str);
     mc_free(_tok);
 }
 
-/*
-static const char* g_token_type_names[] = {
+const char* g_token_type_names[] = {
     "TK_NONE",// none is skipped by tokenizer
     "TK_NUMBER",
 
@@ -112,6 +114,7 @@ static const char* g_token_type_names[] = {
     "TK_EOF"
 };
 
+/*
 static void add_xml_new_line_tag(FILE* fp, Token* _tok, int* _depth)
 {
     if (!_tok) mc_error("current token is null at add_xml_rest_str_tag()");

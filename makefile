@@ -48,7 +48,7 @@ clean:
 
 .PHONY : run
 run: clean $(BIN_DIR)$(PROGRAM)
-	@$(BIN_DIR)$(PROGRAM).exe
+	@$(BIN_DIR)$(PROGRAM)
 
 
 -include $(DEPENDS)

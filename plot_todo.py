@@ -14,6 +14,7 @@ def extract_target(_file, idx, line):
         ss = 'FIXME'
 
     if len(ss):
+        #print(ss + ':' + line[line.find(ss)+len(ss)+2:])
         print(ss + ':' + line[line.find(ss)+len(ss)+2:], end='')
 
 

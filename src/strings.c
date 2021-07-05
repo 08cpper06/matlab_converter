@@ -9,7 +9,7 @@
 int mc_consume(char** _p)
 {
     if (**_p != '\0')
-	*_p = *_p + mc_char_size(*_p);
+		*_p = *_p + mc_char_size(*_p);
     return (int)**_p;
 }
 
@@ -23,8 +23,8 @@ bool mc_skip_space(char** _p)
 {
     bool flag = false;
     while (mc_is_skip(*_p)) {
-	++(*_p);
-	flag = true;
+		++(*_p);
+		flag = true;
     }
     return flag;
 }
@@ -38,20 +38,20 @@ bool mc_is_skip(char* _p)
 bool is_contains(int _c, const char* _cmp)
 {
     for (char* p = (char*)_cmp; *p != '\0'; ++p)
-	if (_c == (int)(*p))
-	    return true;
+		if (_c == (int)(*p))
+			return true;
     return false;
 }
 
 bool is_startwith(char* _head, const char* _word)
 {
     for(;;) {
-	// reach the end of _word
-	if (!*_word) break;
-	// reach the end of _head before reach the end of _word.
-	if (!*_head) return false;
-	if (*_head != *_word) return false;
-	++_head; ++_word;
+		// reach the end of _word
+		if (!*_word) break;
+		// reach the end of _head before reach the end of _word.
+		if (!*_head) return false;
+		if (*_head != *_word) return false;
+		++_head; ++_word;
     }
     return true;
 }
@@ -76,12 +76,12 @@ void mc_set_vector(Vector* _v, void* _p, int _n)
     if (!_v) mc_error("NULL ptr at mc_set_vector()");
     // too short memory size
     if (_v->capacity < _n) {
-	// reallocate necessary buffer size
-	mc_free(_v->buffer);
-	_v->buffer = mc_calloc(1, _v->capacity * 2);
-	if (!_v->buffer)
-	    mc_error("cannot realloc memory for vector's buffer(%d) at set_vec", _v->size);
-	_v->capacity = _v->capacity * 2;
+		// reallocate necessary buffer size
+		mc_free(_v->buffer);
+		_v->buffer = mc_calloc(1, _v->capacity * 2);
+		if (!_v->buffer)
+			mc_error("cannot realloc memory for vector's buffer(%d) at set_vec", _v->size);
+		_v->capacity = _v->capacity * 2;
     }
     memcpy(_v->buffer, _p, _n);
     _v->size = _n;
@@ -94,13 +94,13 @@ void mc_append_vector(Vector* _v, void* _p, int _n)
     int rest = _v->capacity - _v->size;
     // too short memory size
     if (rest <= _n) {
-	// reallocate necessary buffer size
-	void* ptr = mc_calloc(1, _v->capacity * 2);
-	if (!ptr)
-	    mc_error("cannot realloc memory for vector's buffer(%d) at append_vec", _v->size);
-	memcpy(ptr, _v->buffer, _v->size);
-	_v->buffer = ptr;
-	_v->capacity = _v->capacity * 2;
+		// reallocate necessary buffer size
+		void* ptr = mc_calloc(1, _v->capacity * 2);
+		if (!ptr)
+			mc_error("cannot realloc memory for vector's buffer(%d) at append_vec", _v->size);
+		memcpy(ptr, _v->buffer, _v->size);
+		_v->buffer = ptr;
+		_v->capacity = _v->capacity * 2;
     }
     char* buf = (char*)(_v->buffer);
     char* head = &(buf[_v->size]);
@@ -126,8 +126,8 @@ void mc_fit_vector(Vector* _v)
     if (_v->capacity == 0) return;
     int len = strlen(_v->buffer);
     if (len + 1 == _v->size) {
-	if (_v->size == _v->capacity)
-	    return;
+		if (_v->size == _v->capacity)
+			return;
     }
     void* ptr = mc_calloc(1, len + 1);
     strcpy(ptr, _v->buffer);

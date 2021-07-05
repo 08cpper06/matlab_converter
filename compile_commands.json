@@ -1,0 +1,167 @@
+[
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/env.o",
+   "-c",
+   "src/env.c",
+   "-I./src/"
+  ],
+  "file": "src/env.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/file.o",
+   "-c",
+   "src/file.c",
+   "-I./src/"
+  ],
+  "file": "src/file.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/lexer.o",
+   "-c",
+   "src/lexer.c",
+   "-I./src/"
+  ],
+  "file": "src/lexer.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/list.o",
+   "-c",
+   "src/list.c",
+   "-I./src/"
+  ],
+  "file": "src/list.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/main.o",
+   "-c",
+   "src/main.c",
+   "-I./src/"
+  ],
+  "file": "src/main.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/memory.o",
+   "-c",
+   "src/memory.c",
+   "-I./src/"
+  ],
+  "file": "src/memory.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/option.o",
+   "-c",
+   "src/option.c",
+   "-I./src/"
+  ],
+  "file": "src/option.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/parser.o",
+   "-c",
+   "src/parser.c",
+   "-I./src/"
+  ],
+  "file": "src/parser.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/strings.o",
+   "-c",
+   "src/strings.c",
+   "-I./src/"
+  ],
+  "file": "src/strings.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/tokenizer.o",
+   "-c",
+   "src/tokenizer.c",
+   "-I./src/"
+  ],
+  "file": "src/tokenizer.c"
+ },
+ {
+  "directory": "/Users/user/Desktop/dev/matlab_converter",
+  "arguments": [
+   "gcc",
+   "-Wall",
+   "-std=c11",
+   "-DDEBUG",
+   "-o",
+   "build/obj/untokenizer.o",
+   "-c",
+   "src/untokenizer.c",
+   "-I./src/"
+  ],
+  "file": "src/untokenizer.c"
+ }
+]
